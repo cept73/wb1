@@ -1,5 +1,11 @@
 <?php /** @noinspection PhpUnused */
 
+/**
+ * Count tuesdays between two dates
+ *
+ * @return void
+ */
+
 function main()
 {
     $dt1 = $_GET['dt1'] ?? '01.01.2023';
