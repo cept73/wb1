@@ -16,7 +16,10 @@ function main()
 
         // Change prices in %
         $app->changePriceProc('green', 5);
-        $app->changePriceProc('blue', 3);
+        // $app->changePriceProc('blue', 3);
+
+        // Finally will replace tables
+        // $app->run(App::SCENARIO_CONVERT);
     }
     catch (Exception $e) {
         print $e->getMessage() . PHP_EOL;
@@ -111,18 +114,20 @@ class App
         $this->cloneProductsTable();
     }
 
-    public function changePriceProc(string $color, float $deltaPercents)
+    public function changePriceProc(string $color, float $deltaPercents, $useTempTable = true)
     {
         $roundPrice = self::ROUND_PRICE;
-        $formula = 1 + $deltaPercents / 100;
+        $formula    = 1 + $deltaPercents / 100;
+        $tableName  = $useTempTable ? '_products' : 'products';
 
         $this->db->begin_transaction();
 
         $preparedQuery = $this->db->prepare("
-            UPDATE _products SET price = CEILING(price * ? / ?) * ?
+            UPDATE $tableName SET price = CEILING(price * ? / ?) * ?
                 WHERE color_id = (SELECT id FROM colors WHERE name = ?)
         ");
-        $preparedQuery->bind_param('sd', $roundPrice, $roundPrice, $formula, $color);
+        /** @noinspection SpellCheckingInspection */
+        $preparedQuery->bind_param('ddss', $roundPrice, $roundPrice, $formula, $color);
         $preparedQuery->execute();
 
         $this->db->commit();
